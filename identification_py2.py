@@ -251,10 +251,10 @@ def pt1(smooth, time):
     time_constant = smoothed_df.time[smoothed_df.index == abs(smoothed_df.smoothed - standard_output)\
                                      .sort_values().index[0]].values[0]    
     #derived from the equation of standard_output
-    tf_pt1                 = con.matlab.tf(steady_state, [time_constant, 1])
+    tf_pt1                 = con.tf(steady_state, [time_constant, 1])
     numerator, denominator = con.pade(delay, 1)
-    delay_tf_pt1           = con.matlab.tf(numerator,denominator)
-    yout_pt1, t_pt1        = con.matlab.step(tf_pt1 * delay_tf_pt1)
+    delay_tf_pt1           = con.tf(numerator,denominator)
+    t_pt1  ,yout_pt1        = con.step_response(tf_pt1 * delay_tf_pt1)
     #first order transfer function is given by
     ###############################################################################
     #                                  steady_state * (e ^ - (delay * s))         #
@@ -317,10 +317,10 @@ def pt2(smooth, time):
         
     zeta, time_constant, delay = method()
    
-    tf_pt2 = con.matlab.tf(steady_state, [time_constant ** 2, 2 * zeta * time_constant, 1])
+    tf_pt2 = con.tf(steady_state, [time_constant ** 2, 2 * zeta * time_constant, 1])
     n_2, d_2 = con.pade(delay, 1)
-    delay_tf_pt2 = con.matlab.tf(n_2, d_2)
-    yout_pt2,t_pt2 = con.matlab.step(tf_pt2 * delay_tf_pt2)
+    delay_tf_pt2 = con.tf(n_2, d_2)
+    t_pt2, yout_pt2 = con.step_response(tf_pt2 * delay_tf_pt2)
     #second order transfer function is given by
     ########################################################################################################
     #                                           steady_state * (e ^ - (delay * s))                         #
@@ -338,9 +338,9 @@ def ideal_pt1(ss_array, tc_array, d_array):
     ideal_ss                    = np.average(ss_array)
     ideal_tc                    = np.average(tc_array)
     ideal_d                     = np.average(d_array)
-    ideal_tf_pt1                = con.matlab.tf(ideal_ss, [ideal_tc, 1])
+    ideal_tf_pt1                = con.tf(ideal_ss, [ideal_tc, 1])
     numerator, denominator      = con.pade(ideal_d, 1)
-    ideal_d_tf_pt1              = con.matlab.tf(numerator,denominator)
+    ideal_d_tf_pt1              = con.tf(numerator,denominator)
     transfer_function           = ideal_tf_pt1 * ideal_d_tf_pt1
     #############################################################################################################################
     # manual fitting of ideal pt1 model
@@ -351,7 +351,7 @@ def ideal_pt1(ss_array, tc_array, d_array):
     transfer_function.den[0][0][1]  = math.floor(math.sqrt(4 * transfer_function.den[0][0][0] * transfer_function.den[0][0][2]))
     # To obtain the normal result, comment the above line
     #############################################################################################################################
-    ideal_yout_pt1, ideal_t_pt1 = con.matlab.step(transfer_function)
+    ideal_t_pt1, ideal_yout_pt1 = con.step_response(transfer_function)
     return transfer_function, ideal_yout_pt1, ideal_t_pt1, ideal_tf_pt1, ideal_d
 
 
@@ -364,10 +364,10 @@ def ideal_pt2(ss_array, tc_array, d_array, z_array):
     ideal_tc                    = np.average(tc_array)
     ideal_d                     = np.average(d_array)
     ideal_z                     = np.average(z_array)
-    ideal_tf_pt2                = con.matlab.tf(ideal_ss, [ideal_tc ** 2, 2 * ideal_z * ideal_tc, 1])
+    ideal_tf_pt2                = con.tf(ideal_ss, [ideal_tc ** 2, 2 * ideal_z * ideal_tc, 1])
     numerator, denominator      = con.pade(ideal_d, 1)
-    ideal_d_tf_pt2              = con.matlab.tf(numerator,denominator)
-    ideal_yout_pt2, ideal_t_pt2 = con.matlab.step(ideal_tf_pt2 * ideal_d_tf_pt2)
+    ideal_d_tf_pt2              = con.tf(numerator,denominator)
+    ideal_t_pt2, ideal_yout_pt2 = con.step_response(ideal_tf_pt2 * ideal_d_tf_pt2)
     return ideal_tf_pt2 * ideal_d_tf_pt2, ideal_yout_pt2, ideal_t_pt2, ideal_tf_pt2, ideal_d
 
 
